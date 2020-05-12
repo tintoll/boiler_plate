@@ -12,6 +12,7 @@ const { auth } = require('./middleware/auth')
 app.use(bodyParser.urlencoded({extended: true}))
 // apllication/json 형식을 분석하기 위해 추가 
 app.use(bodyParser.json())
+app.use(cookieParser())
 
 // mongdb 연결
 const mongoose = require('mongoose');
@@ -28,7 +29,7 @@ mongoose.connect(config.mongoURI, {
 
 
 app.get('/', (req, res) => res.send('Hello World! 333'))
-app.post('/api/user/register', (req, res) => {
+app.post('/api/users/register', (req, res) => {
     const user = new User(req.body);
     user.save( (err, userInfo) => {
         if(err) return res.json({ success:false, err})
@@ -38,7 +39,7 @@ app.post('/api/user/register', (req, res) => {
     })
 })
 
-app.post('/api/user/login', (req, res) => {
+app.post('/api/users/login', (req, res) => {
     // 로그인 이메일 있는지 확인
     User.findOne({ email : req.body.email}, (err, user) => {
         if(!user) {
@@ -74,7 +75,7 @@ app.post('/api/user/login', (req, res) => {
     })
 })
 
-app.get('/api/user/auth', auth, (req, res) => {
+app.get('/api/users/auth', auth, (req, res) => {
     // 여기까지 미들웨어를 통과해 왔다는 이야기는 auth가 true이라는 말
     // user정보 넘겨줌
     res.status(200).json({
@@ -87,6 +88,19 @@ app.get('/api/user/auth', auth, (req, res) => {
         role : req.user.role,
         image : req.user.image    
     });
+})
+
+
+app.get('/api/users/logout', auth, (req, res) => {
+    User.findOneAndUpdate(
+        { _id : req.user._id} ,
+        { token : ""},
+        (err, user) => {
+            if(err) return res.json({success:false, err})
+            return res.status(200).json({
+                success : true
+            })        
+        })
 })
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
