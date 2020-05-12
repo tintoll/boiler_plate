@@ -75,7 +75,7 @@ app.post('/api/user/login', (req, res) => {
 })
 
 app.get('/api/user/auth', auth, (req, res) => {
-    // 역까지 미들웨어를 통과해 왔다는 이야기는 auth가 true이라는 말
+    // 여기까지 미들웨어를 통과해 왔다는 이야기는 auth가 true이라는 말
     // user정보 넘겨줌
     res.status(200).json({
         _id : req.user._id,
